@@ -502,6 +502,7 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 		const activeMode = this._state.activeMode.get();
 		const hasChanges = (wip.changes?.files?.length ?? 0) > 0;
 		const branchAgentSessions = this.getBranchAgentSessions(wip);
+		const hasPausedOp = wip.changes?.pausedOpStatus != null;
 
 		return html`
 			<gl-details-wip-header
@@ -534,7 +535,7 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 					? this.renderComposeMode()
 					: activeMode === 'compare'
 						? this.renderCompareMode()
-						: hasChanges
+						: hasChanges || hasPausedOp
 							? html`
 									<div class="commit-panel__files">
 										<gl-details-wip-panel
@@ -548,6 +549,9 @@ export class GlGraphDetailsPanel extends SignalWatcher(LitElement) {
 											.orgSettings=${this._state.orgSettings.get()}
 											.isUncommitted=${true}
 											.filesCollapsable=${false}
+											empty-text=${hasPausedOp && !hasChanges
+												? 'No conflicting or changed files'
+												: 'No working changes'}
 											@file-open=${this.handleFileOpen}
 											@file-compare-working=${this.handleFileCompareWorking}
 											@file-compare-previous=${this.handleFileComparePrevious}
